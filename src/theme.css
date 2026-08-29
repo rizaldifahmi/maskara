@@ -7,6 +7,13 @@
 :root[data-theme=dark] .brand-mark{background:#dff7e7;color:#0c513e}
 :root[data-theme=dark] .private-pill,:root[data-theme=dark] .theme-toggle{background:#10231b;border-color:#2b4438;color:#b9cec3}
 :root[data-theme=dark] .theme-toggle:hover{background:#183126}
+:root[data-theme=dark] .primary{background:#c7ff55;color:#10241c;box-shadow:0 5px 18px rgba(0,0,0,.3)}
+:root[data-theme=dark] .primary:hover{background:#d5ff7e;color:#10241c}
+:root[data-theme=dark] .primary:disabled{background:#638032;color:#17221c;opacity:.55}
+:root[data-theme=dark] .actionbar .primary{background:#c7ff55;color:#10241c}
+:root[data-theme=dark] .actionbar .primary:hover{background:#d5ff7e}
+:root[data-theme=dark] .ghost{border-color:#31483d;background:#10231b;color:#dcebe4}
+:root[data-theme=dark] .ghost:hover{background:#193329;color:#f2fff8}
 :root[data-theme=dark] .lede,:root[data-theme=dark] .workspace-head p,:root[data-theme=dark] .success p{color:#9eb2a8}
 :root[data-theme=dark] .dropzone,:root[data-theme=dark] .file-chip,:root[data-theme=dark] .mapping-card,:root[data-theme=dark] .shadcn-card{background:#0d1d17}
 :root[data-theme=dark] .dropzone{border-color:#355448;box-shadow:0 18px 60px rgba(0,0,0,.22)}
