@@ -10,6 +10,7 @@ Aplikasi data masking pasien berbasis React + Vite. Semua data diproses lokal di
 - Mengenali data pasien maupun penyedia layanan seperti nama, kode, email, telepon, dan alamat
 - Mapping/override tipe masking per kolom
 - Nama dimasking parsial sesuai panjang kata, misalnya `Budi Ahmad Putra` menjadi `B*** ***** *****`
+- Nomor dan kode dimasking parsial, misalnya `ABC123456` menjadi `ABC******`
 - Masking deterministik: nilai sumber yang sama menghasilkan samaran yang sama dalam satu file
 - Output CSV UTF-8
 

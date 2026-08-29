@@ -24,7 +24,7 @@ const PATTERNS: Record<Exclude<MaskType, 'none'>, RegExp> = {
   dob: /(^|_)(dob|birth|birth_?date|date_?of_?birth|tanggal_?lahir|tgl_?lahir|papmi_?dob|paper_?dob)(_|$)/i,
   phone: /(^|_)(phone|mobile|telephone|telp|no_?hp|nomor_?hp|whatsapp|wa|papmi_?tel|paper_?tel[howm]?|ctpcp_?(telh|telo|mobilephone)|careprov_?(phone|mobile|telephone)|careprovider_?(phone|mobile|telephone))(_|$)/i,
   address: /(^|_)(address|alamat|street|domicile|domisili|papmi_?addr|paper_?(stname|address|address2|city|postcode)|ctpcp_?(stname|address)|careprov_?address|careprovider_?address)(_|$)/i,
-  id: /(^|_)(mrn|medical_?record|patient_?id|pat_?id|no_?rm|norm|papmi_?(no|ipno|opno|id|rowid)|paper_?(id|rowid)|ctpcp_?(code|rowid)|careprov_?(code|id)|careprovider_?(code|id)|provider_?code|doctor_?code)(_|$)/i,
+  id: /(^|_)(mrn|medical_?record|patient_?id|pat_?id|no_?rm|norm|adm_?no|paadm_?admno|papmi_?(no|ipno|opno|id|rowid)|paper_?(id|rowid)|ctpcp_?(code|rowid)|careprov_?(code|id)|careprovider_?(code|id)|provider_?code|doctor_?code)(_|$)/i,
 }
 
 function normalizeHeader(value: string) {
@@ -46,6 +46,10 @@ function maskName(raw: string) {
   const first = `${parts[0][0]}${'*'.repeat(Math.max(0, parts[0].length - 1))}`
   return [first, ...parts.slice(1).map(part => '*'.repeat(part.length))].join(' ')
 }
+function maskIdentifier(raw: string) {
+  if (raw.length <= 3) return `${raw[0] ?? ''}${'*'.repeat(Math.max(0, raw.length - 1))}`
+  return `${raw.slice(0, 3)}${'*'.repeat(raw.length - 3)}`
+}
 function mask(value: unknown, type: MaskType, seed: string): string | number | boolean | null | undefined {
   if (value === null || value === undefined || value === '' || type === 'none') return value as string | number | boolean | null | undefined
   const raw = String(value), h = hash(seed + '|' + raw)
@@ -53,7 +57,7 @@ function mask(value: unknown, type: MaskType, seed: string): string | number | b
   if (type === 'email') return `user${String(h).padStart(10, '0').slice(0, 8)}@example.test`
   if (type === 'phone') return `08${String(h).padStart(10, '0').slice(0, 10)}`
   if (type === 'address') return `Jl. Data Aman No. ${(h % 199) + 1}, Kota Contoh`
-  if (type === 'id') return `MASK-${String(h).padStart(10, '0').slice(0, 8)}`
+  if (type === 'id') return maskIdentifier(raw)
   if (type === 'dob') {
     const parsed = new Date(raw), year = Number.isNaN(parsed.getTime()) ? 1970 + (h % 35) : parsed.getFullYear()
     return `${year}-${String((h % 12) + 1).padStart(2, '0')}-${String(((h >>> 5) % 28) + 1).padStart(2, '0')}`
