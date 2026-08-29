@@ -35,9 +35,9 @@ File `_headers` dan `_redirects` pada folder `public` otomatis disertakan ke has
 
 ## Struktur
 
-- `src/app` — composition root aplikasi
-- `src/components/ui` — primitive shadcn yang reusable
-- `src/components/layout` — header dan footer
-- `src/components/shared` — komponen lintas fitur
-- `src/features/data-masking` — UI, parser, tipe, dan masking engine
-- `src/hooks` — reusable application hooks
+- `src/app` - composition root aplikasi
+- `src/components/ui` - primitive shadcn yang reusable
+- `src/components/layout` - header dan footer
+- `src/components/shared` - komponen lintas fitur
+- `src/features/data-masking` - UI, parser, tipe, dan masking engine
+- `src/hooks` - reusable application hooks

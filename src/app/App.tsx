@@ -7,8 +7,10 @@ import { UploadStep } from '../features/data-masking/components/upload-step'
 import { downloadCsv, parseDataFile } from '../features/data-masking/file-utils'
 import { createMapping, maskRows } from '../features/data-masking/masking'
 import type { AppStep, ColumnMapping, DataRow, MaskType } from '../features/data-masking/types'
+import { useI18n } from '../i18n/i18n-context'
 
 export default function App() {
+  const { t } = useI18n()
   const [step, setStep] = useState<AppStep>('upload')
   const [rows, setRows] = useState<DataRow[]>([])
   const [fileName, setFileName] = useState('')
@@ -24,10 +26,10 @@ export default function App() {
 
   async function loadFile(file?: File) {
     if (!file) return
-    if (!/\.(csv|txt|xlsx|xls)$/i.test(file.name)) { setError('Format belum didukung. Gunakan CSV, TXT, XLSX, atau XLS.'); return }
+    if (!/\.(csv|txt|xlsx|xls)$/i.test(file.name)) { setError(t('unsupported')); return }
     setError(''); setProcessing(true)
-    try { const data = await parseDataFile(file); if (!data.length) throw new Error('File tidak berisi baris data.'); setRows(data); setFileName(file.name); setMapping(createMapping(Object.keys(data[0]))); setStep('configure') }
-    catch (cause) { setError(cause instanceof Error ? cause.message : 'File tidak dapat dibaca.') }
+    try { const data = await parseDataFile(file); if (!data.length) throw new Error(t('empty')); setRows(data); setFileName(file.name); setMapping(createMapping(Object.keys(data[0]))); setStep('configure') }
+    catch (cause) { setError(cause instanceof Error ? cause.message : t('readError')) }
     finally { setProcessing(false) }
   }
 

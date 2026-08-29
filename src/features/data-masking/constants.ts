@@ -1,6 +1,5 @@
 import type { MaskType } from './types'
 
-export const MASK_LABELS: Record<MaskType, string> = { none: 'Jangan masking', name: 'Nama / deskripsi provider', email: 'Email', dob: 'Tanggal lahir', phone: 'Nomor HP', address: 'Alamat', id: 'Kode / ID' }
 export const MASK_COLORS: Record<Exclude<MaskType, 'none'>, string> = { name: 'violet', email: 'blue', dob: 'amber', phone: 'cyan', address: 'rose', id: 'green' }
 export const ACCEPTED_FILE_TYPES = '.csv,.txt,.xlsx,.xls'
 

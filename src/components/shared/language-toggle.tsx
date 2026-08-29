@@ -1,0 +1,2 @@
+import { useI18n } from '../../i18n/i18n-context'
+export function LanguageToggle() { const { language, setLanguage } = useI18n(); return <div className="language-toggle" role="group" aria-label="Language"><button className={language === 'id' ? 'active' : ''} onClick={() => setLanguage('id')} aria-pressed={language === 'id'}>ID</button><button className={language === 'en' ? 'active' : ''} onClick={() => setLanguage('en')} aria-pressed={language === 'en'}>EN</button></div> }

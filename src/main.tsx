@@ -3,4 +3,5 @@ import { createRoot } from 'react-dom/client'
 import './index.css'
 import './theme.css'
 import App from './app/App'
-createRoot(document.getElementById('root')!).render(<StrictMode><App /></StrictMode>)
+import { I18nProvider } from './i18n/i18n-context'
+createRoot(document.getElementById('root')!).render(<StrictMode><I18nProvider><App /></I18nProvider></StrictMode>)
