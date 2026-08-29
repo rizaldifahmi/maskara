@@ -1,4 +1,4 @@
-# Maskara
+# Maskara - Privacy Data Masking
 
 Aplikasi data masking pasien berbasis React + Vite. Semua data diproses lokal di browser dan tidak dikirim ke server.
 
