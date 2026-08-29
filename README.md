@@ -1,0 +1,31 @@
+# Maskara
+
+Aplikasi data masking pasien berbasis React + Vite. Semua data diproses lokal di browser dan tidak dikirim ke server.
+
+## Fitur
+
+- Input CSV, TXT, XLSX, dan XLS (maks. 25 MB)
+- Deteksi otomatis nama, email, tanggal lahir, nomor HP, alamat, dan ID pasien
+- Mendukung alias SQL umum serta pola kolom TrakCare `PAPMI_*`, `PAPER_*`, dan `CTPCP_*`
+- Mengenali data care provider seperti `CTPCP_Desc`, `CTPCP_Code`, `CTPCP_Email`, nama, telepon, dan alamat
+- Mapping/override tipe masking per kolom
+- Nama dimasking parsial sesuai panjang kata, misalnya `Budi Ahmad Putra` menjadi `B*** ***** *****`
+- Masking deterministik: nilai sumber yang sama menghasilkan samaran yang sama dalam satu file
+- Output CSV UTF-8
+
+## Jalankan lokal
+
+```bash
+npm install
+npm run dev
+```
+
+## Deploy ke Cloudflare Pages
+
+Hubungkan repository ini ke Cloudflare Pages lalu gunakan:
+
+- Build command: `npm run build`
+- Build output directory: `dist`
+- Node.js version: `22` atau lebih baru
+
+File `_headers` dan `_redirects` pada folder `public` otomatis disertakan ke hasil build.
