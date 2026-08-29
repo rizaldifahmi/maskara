@@ -6,8 +6,8 @@ Aplikasi data masking pasien berbasis React + Vite. Semua data diproses lokal di
 
 - Input CSV, TXT, XLSX, dan XLS (maks. 25 MB)
 - Deteksi otomatis nama, email, tanggal lahir, nomor HP, alamat, dan ID pasien
-- Mendukung alias SQL umum serta pola kolom TrakCare `PAPMI_*`, `PAPER_*`, dan `CTPCP_*`
-- Mengenali data care provider seperti `CTPCP_Desc`, `CTPCP_Code`, `CTPCP_Email`, nama, telepon, dan alamat
+- Mendukung berbagai nama kolom teknis dan alias SQL
+- Mengenali data pasien maupun penyedia layanan seperti nama, kode, email, telepon, dan alamat
 - Mapping/override tipe masking per kolom
 - Nama dimasking parsial sesuai panjang kata, misalnya `Budi Ahmad Putra` menjadi `B*** ***** *****`
 - Masking deterministik: nilai sumber yang sama menghasilkan samaran yang sama dalam satu file

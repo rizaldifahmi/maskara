@@ -136,7 +136,7 @@ export default function App() {
           <div className="formats"><Badge>CSV</Badge><Badge>TXT</Badge><Badge>XLSX</Badge><Badge>XLS</Badge><small>Maks. 25 MB</small></div>
         </Card>
         {error && <Alert className="error"><X size={16}/>{error}</Alert>}
-        <div className="trust-row"><div><LockKeyhole/><span><b>Tidak ada upload server</b><small>Data tidak pernah meninggalkan perangkat</small></span></div><div><Sparkles/><span><b>Deteksi kolom pintar</b><small>Kenali alias SQL & kolom TrakCare</small></span></div><div><Download/><span><b>CSV siap pakai</b><small>Format universal untuk analisis</small></span></div></div>
+        <div className="trust-row"><div><LockKeyhole/><span><b>Tidak ada upload server</b><small>Data tidak pernah meninggalkan perangkat</small></span></div><div><Sparkles/><span><b>Deteksi kolom pintar</b><small>Kenali berbagai nama kolom & alias SQL</small></span></div><div><Download/><span><b>CSV siap pakai</b><small>Format universal untuk analisis</small></span></div></div>
       </section>}
 
       {step === 'configure' && <section className="workspace">
