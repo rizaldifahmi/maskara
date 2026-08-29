@@ -10,10 +10,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 type Row = Record<string, unknown>
 type MaskType = 'none' | 'name' | 'email' | 'dob' | 'phone' | 'address' | 'id'
 type Step = 'upload' | 'configure' | 'done'
-type ThemeColor = 'zinc' | 'slate' | 'gray' | 'neutral' | 'stone' | 'emerald'
+type ThemeColor = 'zinc' | 'slate' | 'gray' | 'neutral' | 'stone'
 const THEME_COLORS: { value: ThemeColor; label: string }[] = [
   { value: 'zinc', label: 'Zinc' }, { value: 'slate', label: 'Slate' }, { value: 'gray', label: 'Gray' },
-  { value: 'neutral', label: 'Neutral' }, { value: 'stone', label: 'Stone' }, { value: 'emerald', label: 'Emerald' },
+  { value: 'neutral', label: 'Neutral' }, { value: 'stone', label: 'Stone' },
 ]
 
 const LABELS: Record<MaskType, string> = { none: 'Jangan masking', name: 'Nama / deskripsi provider', email: 'Email', dob: 'Tanggal lahir', phone: 'Nomor HP', address: 'Alamat', id: 'Kode / ID' }
@@ -84,7 +84,10 @@ export default function App() {
     if (saved === 'light' || saved === 'dark') return saved
     return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
   })
-  const [themeColor, setThemeColor] = useState<ThemeColor>(() => (localStorage.getItem('maskara-color') as ThemeColor) || 'zinc')
+  const [themeColor, setThemeColor] = useState<ThemeColor>(() => {
+    const saved = localStorage.getItem('maskara-color')
+    return THEME_COLORS.some(color => color.value === saved) ? saved as ThemeColor : 'zinc'
+  })
   const [step, setStep] = useState<Step>('upload')
   const [rows, setRows] = useState<Row[]>([])
   const [fileName, setFileName] = useState('')
