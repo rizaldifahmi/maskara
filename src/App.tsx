@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import Papa from 'papaparse'
-import { ArrowLeft, Check, Download, FileSpreadsheet, LockKeyhole, Moon, RefreshCw, ShieldCheck, Sparkles, Sun, Upload, X } from 'lucide-react'
+import { ArrowLeft, Check, Download, FileSpreadsheet, LockKeyhole, Moon, Palette, RefreshCw, ShieldCheck, Sparkles, Sun, Upload, X } from 'lucide-react'
 import { Button } from './components/ui/button'
 import { Badge } from './components/ui/badge'
 import { Card } from './components/ui/card'
@@ -10,6 +10,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 type Row = Record<string, unknown>
 type MaskType = 'none' | 'name' | 'email' | 'dob' | 'phone' | 'address' | 'id'
 type Step = 'upload' | 'configure' | 'done'
+type ThemeColor = 'zinc' | 'slate' | 'gray' | 'neutral' | 'stone' | 'emerald'
+const THEME_COLORS: { value: ThemeColor; label: string }[] = [
+  { value: 'zinc', label: 'Zinc' }, { value: 'slate', label: 'Slate' }, { value: 'gray', label: 'Gray' },
+  { value: 'neutral', label: 'Neutral' }, { value: 'stone', label: 'Stone' }, { value: 'emerald', label: 'Emerald' },
+]
 
 const LABELS: Record<MaskType, string> = { none: 'Jangan masking', name: 'Nama / deskripsi provider', email: 'Email', dob: 'Tanggal lahir', phone: 'Nomor HP', address: 'Alamat', id: 'Kode / ID' }
 const COLORS: Record<Exclude<MaskType, 'none'>, string> = { name: 'violet', email: 'blue', dob: 'amber', phone: 'cyan', address: 'rose', id: 'green' }
@@ -75,6 +80,7 @@ export default function App() {
     if (saved === 'light' || saved === 'dark') return saved
     return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
   })
+  const [themeColor, setThemeColor] = useState<ThemeColor>(() => (localStorage.getItem('maskara-color') as ThemeColor) || 'zinc')
   const [step, setStep] = useState<Step>('upload')
   const [rows, setRows] = useState<Row[]>([])
   const [fileName, setFileName] = useState('')
@@ -92,11 +98,14 @@ export default function App() {
     localStorage.setItem('maskara-theme', theme)
     document.querySelector('meta[name="theme-color"]')?.setAttribute('content', theme === 'dark' ? '#08130f' : '#f5f6f2')
   }, [theme])
+  useEffect(() => {
+    document.documentElement.dataset.palette = themeColor
+    localStorage.setItem('maskara-color', themeColor)
+  }, [themeColor])
 
   async function load(file?: File) {
     if (!file) return
     if (!/\.(csv|txt|xlsx|xls)$/i.test(file.name)) { setError('Format belum didukung. Gunakan CSV, TXT, XLSX, atau XLS.'); return }
-    if (file.size > 25 * 1024 * 1024) { setError('Ukuran file melebihi batas 25 MB.'); return }
     setError(''); setProcessing(true)
     try {
       const data = await parseFile(file)
@@ -119,7 +128,7 @@ export default function App() {
   return <div className="app-shell">
     <header className="topbar">
       <Button variant="bare" className="brand" onClick={reset} aria-label="Kembali ke awal"><span className="brand-mark"><ShieldCheck size={19}/></span><span>maskara</span></Button>
-      <div className="header-actions"><Badge className="private-pill"><LockKeyhole size={13}/> 100% lokal di browser</Badge><Button variant="ghost" size="icon" className="theme-toggle" onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')} aria-label={`Gunakan mode ${theme === 'light' ? 'gelap' : 'terang'}`}>{theme === 'light' ? <Moon size={17}/> : <Sun size={17}/>}</Button></div>
+      <div className="header-actions"><Badge className="private-pill"><LockKeyhole size={13}/> 100% lokal di browser</Badge><Select value={themeColor} onValueChange={value => setThemeColor(value as ThemeColor)}><SelectTrigger aria-label="Pilih warna tema" className="color-mode-trigger"><Palette size={16}/><SelectValue/></SelectTrigger><SelectContent>{THEME_COLORS.map(color => <SelectItem value={color.value} key={color.value}><span className={`color-dot ${color.value}`}/>{color.label}</SelectItem>)}</SelectContent></Select><Button variant="ghost" size="icon" className="theme-toggle" onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')} aria-label={`Gunakan mode ${theme === 'light' ? 'gelap' : 'terang'}`}>{theme === 'light' ? <Moon size={17}/> : <Sun size={17}/>}</Button></div>
     </header>
 
     <main>
@@ -133,7 +142,7 @@ export default function App() {
           <h2>{processing ? 'Membaca file…' : 'Tarik & lepas file di sini'}</h2>
           <p>atau</p>
           <Button disabled={processing} onClick={() => inputRef.current?.click()}><FileSpreadsheet size={18}/> Pilih file</Button>
-          <div className="formats"><Badge>CSV</Badge><Badge>TXT</Badge><Badge>XLSX</Badge><Badge>XLS</Badge><small>Maks. 25 MB</small></div>
+          <div className="formats"><Badge>CSV</Badge><Badge>TXT</Badge><Badge>XLSX</Badge><Badge>XLS</Badge></div>
         </Card>
         {error && <Alert className="error"><X size={16}/>{error}</Alert>}
         <div className="trust-row"><div><LockKeyhole/><span><b>Tidak ada upload server</b><small>Data tidak pernah meninggalkan perangkat</small></span></div><div><Sparkles/><span><b>Deteksi kolom pintar</b><small>Kenali berbagai nama kolom & alias SQL</small></span></div><div><Download/><span><b>CSV siap pakai</b><small>Format universal untuk analisis</small></span></div></div>

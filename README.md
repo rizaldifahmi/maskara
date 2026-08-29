@@ -4,7 +4,7 @@ Aplikasi data masking pasien berbasis React + Vite. Semua data diproses lokal di
 
 ## Fitur
 
-- Input CSV, TXT, XLSX, dan XLS (maks. 25 MB)
+- Input CSV, TXT, XLSX, dan XLS
 - Deteksi otomatis nama, email, tanggal lahir, nomor HP, alamat, dan ID pasien
 - Mendukung berbagai nama kolom teknis dan alias SQL
 - Mengenali data pasien maupun penyedia layanan seperti nama, kode, email, telepon, dan alamat
