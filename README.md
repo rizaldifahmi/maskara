@@ -13,6 +13,7 @@ Aplikasi data masking pasien berbasis React + Vite. Semua data diproses lokal di
 - Nomor dan kode dimasking parsial, misalnya `ABC123456` menjadi `ABC******`
 - Masking deterministik: nilai sumber yang sama menghasilkan samaran yang sama dalam satu file
 - Output CSV UTF-8
+- Output mempertahankan tipe input: CSV, TXT, XLS, atau XLSX
 - Tema shadcn Zinc, Slate, Gray, Neutral, dan Stone dengan light/dark mode
 - Static prerender shell untuk first paint dan fallback tanpa JavaScript
 

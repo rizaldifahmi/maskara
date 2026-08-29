@@ -13,20 +13,22 @@ export async function parseDataFile(file: File): Promise<DataRow[]> {
   return result.data
 }
 
-function downloadCsv(rows: DataRow[], fileName: string) {
-  const csv = Papa.unparse(rows, { quotes: true })
-  const url = URL.createObjectURL(new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8' }))
+function downloadDelimited(rows: DataRow[], fileName: string, extension: 'csv' | 'txt') {
+  const content = Papa.unparse(rows, { quotes: extension === 'csv', delimiter: extension === 'txt' ? '\t' : ',' })
+  const mime = extension === 'txt' ? 'text/plain;charset=utf-8' : 'text/csv;charset=utf-8'
+  const url = URL.createObjectURL(new Blob(['\uFEFF' + content], { type: mime }))
   const anchor = document.createElement('a')
-  anchor.href = url; anchor.download = `${fileName.replace(/\.[^.]+$/, '')}_masked.csv`; anchor.click(); URL.revokeObjectURL(url)
+  anchor.href = url; anchor.download = `${fileName.replace(/\.[^.]+$/, '')}_masked.${extension}`; anchor.click(); URL.revokeObjectURL(url)
 }
 
 export async function downloadMaskedFile(rows: DataRow[], fileName: string) {
-  if (/\.(xlsx|xls)$/i.test(fileName)) {
+  const extension = fileName.split('.').pop()?.toLowerCase()
+  if (extension === 'xlsx' || extension === 'xls') {
     const XLSX = await import('xlsx')
     const workbook = XLSX.utils.book_new()
     XLSX.utils.book_append_sheet(workbook, XLSX.utils.json_to_sheet(rows), 'Masked Data')
-    XLSX.writeFile(workbook, `${fileName.replace(/\.[^.]+$/, '')}_masked.xlsx`, { compression: true })
+    XLSX.writeFile(workbook, `${fileName.replace(/\.[^.]+$/, '')}_masked.${extension}`, { compression: extension === 'xlsx', bookType: extension })
     return
   }
-  downloadCsv(rows, fileName)
+  downloadDelimited(rows, fileName, extension === 'txt' ? 'txt' : 'csv')
 }
