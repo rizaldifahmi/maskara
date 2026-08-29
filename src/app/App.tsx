@@ -4,7 +4,7 @@ import { AppHeader } from '../components/layout/app-header'
 import { ConfigureStep } from '../features/data-masking/components/configure-step'
 import { SuccessStep } from '../features/data-masking/components/success-step'
 import { UploadStep } from '../features/data-masking/components/upload-step'
-import { downloadCsv, parseDataFile } from '../features/data-masking/file-utils'
+import { downloadMaskedFile, parseDataFile } from '../features/data-masking/file-utils'
 import { createMapping, maskRows } from '../features/data-masking/masking'
 import type { AppStep, ColumnMapping, DataRow, MaskType } from '../features/data-masking/types'
 import { useI18n } from '../i18n/i18n-context'
@@ -20,7 +20,7 @@ export default function App() {
   const columns = useMemo(() => rows[0] ? Object.keys(rows[0]) : [], [rows])
 
   const reset = () => { setRows([]); setFileName(''); setMapping({}); setError(''); setStep('upload') }
-  const exportMasked = () => { downloadCsv(maskRows(rows, columns, mapping, fileName || 'maskara'), fileName); setStep('done') }
+  const exportMasked = async () => { await downloadMaskedFile(maskRows(rows, columns, mapping, fileName || 'maskara'), fileName); setStep('done') }
   const detectColumns = () => setMapping(createMapping(columns))
   const updateMapping = (column: string, type: MaskType) => setMapping(current => ({ ...current, [column]: type }))
 
