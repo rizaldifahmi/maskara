@@ -1,7 +1,7 @@
 import type { MaskType } from './types'
 
 export const MASK_COLORS: Record<Exclude<MaskType, 'none'>, string> = { name: 'violet', email: 'blue', dob: 'amber', phone: 'cyan', address: 'rose', id: 'green' }
-export const ACCEPTED_FILE_TYPES = '.csv,.txt,.xlsx,.xls'
+export const ACCEPTED_FILE_TYPES = '.csv,.txt,.xlsx,.xls,.png,.jpg,.jpeg,.webp'
 
 export const MASK_PATTERNS: Record<Exclude<MaskType, 'none'>, RegExp> = {
   name: /(^|_)(nama|name|patient_?name|pat_?name|full_?name|firstname|lastname|surname|givenname|othername|papmi_?name[2-8]?|paper_?name[2-8]?|ctpcp_?(desc|surname|firstname|othername)|careprov_?(desc|description|name)|careprovider_?(desc|description|name)|provider_?(desc|description|name)|doctor_?(desc|description|name))(_|$)/i,

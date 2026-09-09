@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { AppFooter } from '../components/layout/app-footer'
 import { AppHeader } from '../components/layout/app-header'
 import { ConfigureStep } from '../features/data-masking/components/configure-step'
@@ -20,6 +20,24 @@ export default function App() {
   const [processing, setProcessing] = useState(false)
   const columns = useMemo(() => rows[0] ? Object.keys(rows[0]) : [], [rows])
 
+  useEffect(() => {
+    const handlePaste = (e: ClipboardEvent) => {
+      const items = e.clipboardData?.items
+      if (!items) return
+      for (const item of Array.from(items)) {
+        if (item.type.indexOf('image') !== -1) {
+          const blob = item.getAsFile()
+          if (blob) {
+            const file = new File([blob], `paste-${Date.now()}.png`, { type: blob.type })
+            loadFile(file)
+          }
+        }
+      }
+    }
+    window.addEventListener('paste', handlePaste)
+    return () => window.removeEventListener('paste', handlePaste)
+  }, [])
+
   const reset = () => { setRows([]); setFileName(''); setMapping({}); setDetections({}); setError(''); setStep('upload') }
   const exportMasked = async () => { await downloadMaskedFile(maskRows(rows, columns, mapping, fileName || 'maskara'), fileName); setStep('done') }
   const detectColumns = () => { const next = analyzeColumns(columns, rows); setDetections(next); setMapping(mappingFromDetections(next)) }
@@ -27,7 +45,7 @@ export default function App() {
 
   async function loadFile(file?: File) {
     if (!file) return
-    if (!/\.(csv|txt|xlsx|xls)$/i.test(file.name)) { setError(t('unsupported')); return }
+    if (!/\.(csv|txt|xlsx|xls|png|jpg|jpeg|webp)$/i.test(file.name)) { setError(t('unsupported')); return }
     setError(''); setProcessing(true)
     try { const data = await parseDataFile(file); if (!data.length) throw new Error(t('empty')); const next = analyzeColumns(Object.keys(data[0]), data); setRows(data); setFileName(file.name); setDetections(next); setMapping(mappingFromDetections(next)); setStep('configure') }
     catch (cause) { setError(cause instanceof Error ? cause.message : t('readError')) }
