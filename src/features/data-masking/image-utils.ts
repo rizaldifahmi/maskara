@@ -5,14 +5,13 @@ let workerIdCounter = 0
 
 /** Indonesian-aware sensitive data patterns */
 const SENSITIVE_PATTERNS = [
-  /\b\d{2}[-/.]\d{2}[-/.]\d{2,4}\b/,                          // dates
-  /\b\d{4}[-/.]\d{2}[-/.]\d{2}\b/,                            // ISO dates
+  /\b\d{2,4}[-/.]\d{1,2}[-/.]\d{2,4}\b/,                      // dates (flexible for OCR errors like 2001/1965)
   /(\+62|62|08)\d{7,12}/,                                      // Indonesian phone
   /\b\d{16}\b/,                                                // NIK (16 digits)
   /\b\d{13}\b/,                                                // BPJS (13 digits)
   /\b[A-Z]{1,2}\s?\d{1,4}\s?[A-Z]{1,3}\b/,                   // plate numbers
   /\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b/i,              // email
-  /\b\d{5,}\b/,                                                // long numbers (MRN, IDs)
+  /\b\d{5,12}\b/,                                              // long numbers (MRN, IDs, missing slash dates like 22082026)
   /\b(Jl\.?|Jalan|RT|RW|Kel\.?|Kec\.?)\b/i,                  // address prefixes
 ]
 
@@ -35,11 +34,34 @@ export async function detectSensitiveAreas(
         }
       },
     })
+    
+    // Use Sparse Text PSM (11) which is much better for UI screenshots
+    await worker.setParameters({
+      tessedit_pageseg_mode: '11' as any
+    })
 
     const image = typeof imageSource === 'string' ? imageSource : URL.createObjectURL(imageSource)
     onProgress?.({ status: 'recognizing', progress: 0 })
-    const result: any = await worker.recognize(image)
-    const words = result.data.words || []
+    
+    // In Tesseract v7, words are not at the root level, we MUST request blocks
+    const result: any = await worker.recognize(image, undefined, { blocks: true })
+    
+    // Extract words from the blocks hierarchy
+    const words: any[] = []
+    if (result.data.blocks) {
+      for (const block of result.data.blocks) {
+        if (!block.paragraphs) continue
+        for (const para of block.paragraphs) {
+          if (!para.lines) continue
+          for (const line of para.lines) {
+            if (!line.words) continue
+            for (const word of line.words) {
+              words.push(word)
+            }
+          }
+        }
+      }
+    }
 
     if (typeof imageSource !== 'string') URL.revokeObjectURL(image)
     await worker.terminate()
@@ -48,7 +70,11 @@ export async function detectSensitiveAreas(
     // Group adjacent sensitive words into larger areas
     const sensitiveWords = words.filter((word: any) => {
       const text = (word.text || '').trim()
-      if (!text) return false
+      if (!text || text.length < 2) return false
+      
+      // Ignore obvious OCR garbage
+      if (/^(RR|OR|ER)+$/i.test(text)) return false
+      
       return isSensitive(text) || (word.confidence != null && word.confidence < 55)
     })
 
