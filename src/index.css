@@ -57,5 +57,7 @@
 .area-text{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-align:left}
 .area-icon{color:var(--muted-foreground);flex-shrink:0}
 .no-areas{padding:12px;border:1px solid var(--border);border-radius:8px;color:var(--muted-foreground);font-size:12px;text-align:center}
+.progress-bar-container{width:200px;height:6px;margin:12px auto;background:var(--border);border-radius:99px;overflow:hidden}
+.progress-bar-fill{height:100%;background:var(--foreground);transition:width 0.2s ease-out}
 
 @media(max-width:760px){.hero{padding-top:50px}.hero h1{font-size:42px}.dropzone{padding:32px 18px}.trust-row{grid-template-columns:1fr}.workspace-head{align-items:flex-start;flex-direction:column}.file-chip{width:100%}.statline span{display:none}.mapping-card{overflow-x:auto}.mapping-title,.mapping-row{min-width:690px}.actionbar>div{display:none}.actionbar .primary{width:100%}.private-pill{display:none}.color-mode-trigger{width:36px;padding:0;justify-content:center}.color-mode-trigger>span:not([class]){display:none}.color-mode-trigger>svg:last-child{display:none}footer p{display:none}.success .ghost{margin:10px 0 0}.image-preview-layout{grid-template-columns:1fr}.image-controls{order:-1}.area-list-card{max-height:250px}}

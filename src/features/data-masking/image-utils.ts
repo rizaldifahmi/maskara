@@ -20,15 +20,30 @@ function isSensitive(text: string): boolean {
   return SENSITIVE_PATTERNS.some(pattern => pattern.test(text))
 }
 
-export async function detectSensitiveAreas(imageSource: string | File): Promise<ImageRedactionArea[]> {
+export type OcrProgress = { status: string; progress: number }
+
+export async function detectSensitiveAreas(
+  imageSource: string | File,
+  onProgress?: (p: OcrProgress) => void
+): Promise<ImageRedactionArea[]> {
   try {
-    const worker = await createWorker('eng+ind')
+    onProgress?.({ status: 'loading', progress: 0 })
+    const worker = await createWorker('eng', undefined, {
+      logger: (m: any) => {
+        if (m.status && m.progress != null) {
+          onProgress?.({ status: m.status, progress: Math.round(m.progress * 100) })
+        }
+      },
+    })
+
     const image = typeof imageSource === 'string' ? imageSource : URL.createObjectURL(imageSource)
+    onProgress?.({ status: 'recognizing', progress: 0 })
     const result: any = await worker.recognize(image)
     const words = result.data.words || []
 
     if (typeof imageSource !== 'string') URL.revokeObjectURL(image)
     await worker.terminate()
+    onProgress?.({ status: 'done', progress: 100 })
 
     // Group adjacent sensitive words into larger areas
     const sensitiveWords = words.filter((word: any) => {

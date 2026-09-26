@@ -7,6 +7,7 @@ import { SuccessStep } from '../features/data-masking/components/success-step'
 import { UploadStep } from '../features/data-masking/components/upload-step'
 import { downloadMaskedFile, isImageFile, parseDataFile } from '../features/data-masking/file-utils'
 import { detectSensitiveAreas } from '../features/data-masking/image-utils'
+import type { OcrProgress } from '../features/data-masking/image-utils'
 import { analyzeColumns, mappingFromDetections, maskRows } from '../features/data-masking/masking'
 import type { AppStep, ColumnDetections, ColumnMapping, DataRow, ImageRedactionArea, MaskType } from '../features/data-masking/types'
 import { useI18n } from '../i18n/i18n-context'
@@ -20,6 +21,7 @@ export default function App() {
   const [detections, setDetections] = useState<ColumnDetections>({})
   const [error, setError] = useState('')
   const [processing, setProcessing] = useState(false)
+  const [ocrProgress, setOcrProgress] = useState<OcrProgress | null>(null)
   const columns = useMemo(() => rows[0] ? Object.keys(rows[0]) : [], [rows])
 
   // Image-specific state
@@ -44,7 +46,7 @@ export default function App() {
     return () => window.removeEventListener('paste', handlePaste)
   }, [])
 
-  const reset = () => { setRows([]); setFileName(''); setMapping({}); setDetections({}); setError(''); setImageFile(null); setImageAreas([]); setStep('upload') }
+  const reset = () => { setRows([]); setFileName(''); setMapping({}); setDetections({}); setError(''); setImageFile(null); setImageAreas([]); setOcrProgress(null); setStep('upload') }
   const exportMasked = async () => { await downloadMaskedFile(maskRows(rows, columns, mapping, fileName || 'maskara'), fileName); setStep('done') }
   const detectColumns = () => { const next = analyzeColumns(columns, rows); setDetections(next); setMapping(mappingFromDetections(next)) }
   const updateMapping = (column: string, type: MaskType) => setMapping(current => ({ ...current, [column]: type }))
@@ -56,7 +58,8 @@ export default function App() {
     try {
       if (isImageFile(file)) {
         // Image flow — go to dedicated image preview
-        const areas = await detectSensitiveAreas(file)
+        const areas = await detectSensitiveAreas(file, setOcrProgress)
+        setOcrProgress(null)
         setImageFile(file)
         setImageAreas(areas)
         setFileName(file.name)
@@ -73,5 +76,5 @@ export default function App() {
     finally { setProcessing(false) }
   }
 
-  return <div className="app-shell"><AppHeader onHome={reset}/><main>{step === 'upload' && <UploadStep processing={processing} error={error} onFile={loadFile}/>} {step === 'configure' && <ConfigureStep rows={rows} fileName={fileName} columns={columns} mapping={mapping} detections={detections} onMapping={updateMapping} onDetect={detectColumns} onBack={reset} onExport={exportMasked}/>} {step === 'image-preview' && imageFile && <ImagePreviewStep file={imageFile} areas={imageAreas} onAreasChange={setImageAreas} onBack={reset}/>} {step === 'done' && <SuccessStep rowCount={rows.length} onReset={reset} onDownload={exportMasked}/>}</main><AppFooter/></div>
+  return <div className="app-shell"><AppHeader onHome={reset}/><main>{step === 'upload' && <UploadStep processing={processing} ocrProgress={ocrProgress} error={error} onFile={loadFile}/>} {step === 'configure' && <ConfigureStep rows={rows} fileName={fileName} columns={columns} mapping={mapping} detections={detections} onMapping={updateMapping} onDetect={detectColumns} onBack={reset} onExport={exportMasked}/>} {step === 'image-preview' && imageFile && <ImagePreviewStep file={imageFile} areas={imageAreas} onAreasChange={setImageAreas} onBack={reset}/>} {step === 'done' && <SuccessStep rowCount={rows.length} onReset={reset} onDownload={exportMasked}/>}</main><AppFooter/></div>
 }
