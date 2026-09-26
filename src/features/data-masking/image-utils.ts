@@ -15,8 +15,35 @@ const SENSITIVE_PATTERNS = [
   /\b(Jl\.?|Jalan|RT|RW|Kel\.?|Kec\.?)\b/i,                  // address prefixes
 ]
 
+const EXCLUDED_UI_WORDS = new Set([
+  'date', 'no', 'age', 'record', 'encounter', 'management', 'problem',
+  'episode', 'payor', 'paid', 'self', 'assistant', 'charts', 'filter',
+  'reason', 'sex', 'male', 'female', 'back', 'to', 'full', 'urn', 'dob',
+  'patient', 'doctor', 'provider', 'history', 'clinical', 'summary',
+  'time', 'status', 'type', 'category', 'action', 'edit', 'view', 'delete',
+  'save', 'cancel', 'close', 'open', 'add', 'new', 'search', 'find',
+  'home', 'dashboard', 'settings', 'profile', 'logout', 'login', 'user',
+  'admin', 'system', 'report', 'data', 'file', 'export', 'import',
+  'download', 'upload', 'print', 'share', 'send', 'receive', 'message',
+  'notification', 'alert', 'error', 'success', 'warning', 'info',
+  'mr', 'mrs', 'ms', 'dr', 'drg', 'prof', 'tn', 'ny', 'sdr', 'sdri',
+  'for', 'this', 'and', 'the', 'of', 'in', 'on', 'at', 'by', 'with'
+])
+
+const NAME_WORD_PATTERN = /^[A-Z][a-z]+(?:[-'][A-Z]?[a-z]+)*$/
+
 function isSensitive(text: string): boolean {
-  return SENSITIVE_PATTERNS.some(pattern => pattern.test(text))
+  if (SENSITIVE_PATTERNS.some(pattern => pattern.test(text))) return true
+  
+  // Catch names (Capitalized words that are not common UI labels)
+  const cleanText = text.replace(/^[^\w]+|[^\w]+$/g, '')
+  if (NAME_WORD_PATTERN.test(cleanText)) {
+    if (!EXCLUDED_UI_WORDS.has(cleanText.toLowerCase()) && cleanText.length > 2) {
+      return true
+    }
+  }
+  
+  return false
 }
 
 export type OcrProgress = { status: string; progress: number }
