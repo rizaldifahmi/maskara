@@ -9,33 +9,38 @@ export interface RedactionArea {
 }
 
 export async function detectSensitiveAreas(imageSource: string | File): Promise<RedactionArea[]> {
-  const worker = await createWorker('ind+eng')
-  
-  const image = typeof imageSource === 'string' ? imageSource : URL.createObjectURL(imageSource)
-  const result: any = await worker.recognize(image)
-  const words = result.data.words
-  
-  if (typeof imageSource !== 'string') URL.revokeObjectURL(image)
-  await worker.terminate()
+  try {
+    const worker = await createWorker('eng')
+    
+    const image = typeof imageSource === 'string' ? imageSource : URL.createObjectURL(imageSource)
+    const result: any = await worker.recognize(image)
+    const words = result.data.words || []
+    
+    if (typeof imageSource !== 'string') URL.revokeObjectURL(image)
+    await worker.terminate()
 
-  const sensitiveAreas: RedactionArea[] = words
-    .filter((word: any) => {
-      const text = word.text.toLowerCase()
-      const isDate = /\d{2}[-/]\d{2}[-/]\d{4}/.test(text)
-      const isPhone = /(\+62|08)\d{8,}/.test(text)
-      const isID = /[A-Z]{2,3}\d{5,}/.test(text)
-      
-      return isDate || isPhone || isID || word.confidence < 60
-    })
-    .map((word: any) => ({
-      x: word.bbox.x0,
-      y: word.bbox.y0,
-      width: word.bbox.x1 - word.bbox.x0,
-      height: word.bbox.y1 - word.bbox.y0,
-      text: word.text
-    }))
+    const sensitiveAreas: RedactionArea[] = words
+      .filter((word: any) => {
+        const text = (word.text || '').toLowerCase()
+        const isDate = /\d{2}[-/]\d{2}[-/]\d{4}/.test(text)
+        const isPhone = /(\+62|08)\d{8,}/.test(text)
+        const isID = /[A-Z]{2,3}\d{5,}/.test(text)
+        
+        return isDate || isPhone || isID || (word.confidence && word.confidence < 60)
+      })
+      .map((word: any) => ({
+        x: word.bbox.x0,
+        y: word.bbox.y0,
+        width: word.bbox.x1 - word.bbox.x0,
+        height: word.bbox.y1 - word.bbox.y0,
+        text: word.text
+      }))
 
-  return sensitiveAreas
+    return sensitiveAreas
+  } catch (err) {
+    console.warn('Tesseract OCR detection warning:', err)
+    return []
+  }
 }
 
 export async function redactImage(
