@@ -1,18 +1,15 @@
 import Papa from 'papaparse'
 import type { DataRow } from './types'
-import { detectSensitiveAreas } from './image-utils'
+
+const IMAGE_EXTENSIONS = new Set(['png', 'jpg', 'jpeg', 'webp'])
+
+export function isImageFile(file: File): boolean {
+  const ext = file.name.split('.').pop()?.toLowerCase() ?? ''
+  return IMAGE_EXTENSIONS.has(ext)
+}
 
 export async function parseDataFile(file: File): Promise<DataRow[]> {
   const extension = file.name.split('.').pop()?.toLowerCase()
-  if (extension === 'png' || extension === 'jpg' || extension === 'jpeg' || extension === 'webp') {
-    const areas = await detectSensitiveAreas(file)
-    // Create a special data row format for image processing
-    return [{
-      type: 'image',
-      file: file,
-      areas: JSON.stringify(areas)
-    }] as any
-  }
   if (extension === 'xlsx' || extension === 'xls') {
     const XLSX = await import('xlsx')
     const workbook = XLSX.read(await file.arrayBuffer(), { type: 'array', cellDates: false })

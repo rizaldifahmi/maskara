@@ -2,11 +2,13 @@ import { useEffect, useMemo, useState } from 'react'
 import { AppFooter } from '../components/layout/app-footer'
 import { AppHeader } from '../components/layout/app-header'
 import { ConfigureStep } from '../features/data-masking/components/configure-step'
+import { ImagePreviewStep } from '../features/data-masking/components/image-preview-step'
 import { SuccessStep } from '../features/data-masking/components/success-step'
 import { UploadStep } from '../features/data-masking/components/upload-step'
-import { downloadMaskedFile, parseDataFile } from '../features/data-masking/file-utils'
+import { downloadMaskedFile, isImageFile, parseDataFile } from '../features/data-masking/file-utils'
+import { detectSensitiveAreas } from '../features/data-masking/image-utils'
 import { analyzeColumns, mappingFromDetections, maskRows } from '../features/data-masking/masking'
-import type { AppStep, ColumnDetections, ColumnMapping, DataRow, MaskType } from '../features/data-masking/types'
+import type { AppStep, ColumnDetections, ColumnMapping, DataRow, ImageRedactionArea, MaskType } from '../features/data-masking/types'
 import { useI18n } from '../i18n/i18n-context'
 
 export default function App() {
@@ -19,6 +21,10 @@ export default function App() {
   const [error, setError] = useState('')
   const [processing, setProcessing] = useState(false)
   const columns = useMemo(() => rows[0] ? Object.keys(rows[0]) : [], [rows])
+
+  // Image-specific state
+  const [imageFile, setImageFile] = useState<File | null>(null)
+  const [imageAreas, setImageAreas] = useState<ImageRedactionArea[]>([])
 
   useEffect(() => {
     const handlePaste = (e: ClipboardEvent) => {
@@ -38,7 +44,7 @@ export default function App() {
     return () => window.removeEventListener('paste', handlePaste)
   }, [])
 
-  const reset = () => { setRows([]); setFileName(''); setMapping({}); setDetections({}); setError(''); setStep('upload') }
+  const reset = () => { setRows([]); setFileName(''); setMapping({}); setDetections({}); setError(''); setImageFile(null); setImageAreas([]); setStep('upload') }
   const exportMasked = async () => { await downloadMaskedFile(maskRows(rows, columns, mapping, fileName || 'maskara'), fileName); setStep('done') }
   const detectColumns = () => { const next = analyzeColumns(columns, rows); setDetections(next); setMapping(mappingFromDetections(next)) }
   const updateMapping = (column: string, type: MaskType) => setMapping(current => ({ ...current, [column]: type }))
@@ -47,10 +53,25 @@ export default function App() {
     if (!file) return
     if (!/\.(csv|txt|xlsx|xls|png|jpg|jpeg|webp)$/i.test(file.name)) { setError(t('unsupported')); return }
     setError(''); setProcessing(true)
-    try { const data = await parseDataFile(file); if (!data.length) throw new Error(t('empty')); const next = analyzeColumns(Object.keys(data[0]), data); setRows(data); setFileName(file.name); setDetections(next); setMapping(mappingFromDetections(next)); setStep('configure') }
+    try {
+      if (isImageFile(file)) {
+        // Image flow — go to dedicated image preview
+        const areas = await detectSensitiveAreas(file)
+        setImageFile(file)
+        setImageAreas(areas)
+        setFileName(file.name)
+        setStep('image-preview')
+      } else {
+        // Data file flow — go to column mapping
+        const data = await parseDataFile(file)
+        if (!data.length) throw new Error(t('empty'))
+        const next = analyzeColumns(Object.keys(data[0]), data)
+        setRows(data); setFileName(file.name); setDetections(next); setMapping(mappingFromDetections(next)); setStep('configure')
+      }
+    }
     catch (cause) { setError(cause instanceof Error ? cause.message : t('readError')) }
     finally { setProcessing(false) }
   }
 
-  return <div className="app-shell"><AppHeader onHome={reset}/><main>{step === 'upload' && <UploadStep processing={processing} error={error} onFile={loadFile}/>} {step === 'configure' && <ConfigureStep rows={rows} fileName={fileName} columns={columns} mapping={mapping} detections={detections} onMapping={updateMapping} onDetect={detectColumns} onBack={reset} onExport={exportMasked}/>} {step === 'done' && <SuccessStep rowCount={rows.length} onReset={reset} onDownload={exportMasked}/>}</main><AppFooter/></div>
+  return <div className="app-shell"><AppHeader onHome={reset}/><main>{step === 'upload' && <UploadStep processing={processing} error={error} onFile={loadFile}/>} {step === 'configure' && <ConfigureStep rows={rows} fileName={fileName} columns={columns} mapping={mapping} detections={detections} onMapping={updateMapping} onDetect={detectColumns} onBack={reset} onExport={exportMasked}/>} {step === 'image-preview' && imageFile && <ImagePreviewStep file={imageFile} areas={imageAreas} onAreasChange={setImageAreas} onBack={reset}/>} {step === 'done' && <SuccessStep rowCount={rows.length} onReset={reset} onDownload={exportMasked}/>}</main><AppFooter/></div>
 }
