@@ -13,6 +13,7 @@ const SENSITIVE_PATTERNS = [
   /\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b/i,              // email
   /\b\d{5,12}\b/,                                              // long numbers (MRN, IDs, missing slash dates like 22082026)
   /\b(Jl\.?|Jalan|RT|RW|Kel\.?|Kec\.?)\b/i,                  // address prefixes
+  /\b\d{1,3}\s*(?:Y(?:ears?)?|Thn?|Tahun)\b/i,               // Age like 61Y, 61 Years, 61 Thn
 ]
 
 const EXCLUDED_UI_WORDS = new Set([
