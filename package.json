@@ -1,0 +1,8 @@
+{
+  "name": "monthly-report-monorepo",
+  "private": true,
+  "workspaces": [
+    "frontend",
+    "backend"
+  ]
+}
