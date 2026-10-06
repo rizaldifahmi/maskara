@@ -1,0 +1,20 @@
+#!/bin/sh
+. "$(dirname "$0")/_/husky.sh"
+
+echo "Running pre-commit hook..."
+
+# Prevent secret leakage check
+# Check if any staged files match a simple regex for private keys or generic passwords
+if git diff --cached --name-only | xargs grep -EHi "(-----BEGIN (RSA|PRIVATE) KEY-----|AKIA[0-9A-Z]{16})"; then
+    echo "ERROR: Potential secrets found in staged files. Commit aborted."
+    exit 1
+fi
+
+# Ensure no .env files are being committed explicitly
+if git diff --cached --name-only | grep -E "(^|/)\.env"; then
+    echo "ERROR: Do not commit .env files. Commit aborted."
+    exit 1
+fi
+
+# Run lint-staged
+npx lint-staged
