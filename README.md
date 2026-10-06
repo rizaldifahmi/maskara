@@ -4,7 +4,7 @@ Aplikasi data masking pasien berbasis React + Vite. Semua data diproses lokal di
 
 ## Fitur
 
-- Input CSV, TXT, XLSX, dan XLS
+- Input CSV, TXT, XLSX, XLS, HTML, dan HTM
 - Deteksi otomatis nama, email, tanggal lahir, nomor HP, alamat, dan ID pasien
 - Mendukung berbagai nama kolom teknis dan alias SQL
 - Mengenali data pasien maupun penyedia layanan seperti nama, kode, email, telepon, dan alamat
@@ -14,6 +14,7 @@ Aplikasi data masking pasien berbasis React + Vite. Semua data diproses lokal di
 - Masking deterministik: nilai sumber yang sama menghasilkan samaran yang sama dalam satu file
 - Output CSV UTF-8
 - Output mempertahankan tipe input: CSV, TXT, XLS, atau XLSX
+- Mode HTML menghasilkan HTML/HTM kembali tanpa memformat ulang source dan mendeteksi `email`, `username`, `password`, `portalLink`, `url`, `website`, `web`, serta `link`
 - Tema shadcn Zinc, Slate, Gray, Neutral, dan Stone dengan light/dark mode
 - Static prerender shell untuk first paint dan fallback tanpa JavaScript
 

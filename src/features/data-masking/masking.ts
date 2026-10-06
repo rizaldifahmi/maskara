@@ -18,6 +18,9 @@ const detectors: Record<Exclude<MaskType, 'none'>, (value: string) => boolean> =
   address: value => /\b(jl\.?|jalan|street|st\.?|road|rd\.?|avenue|ave\.?|kota|city|kabupaten|district)\b/i.test(value),
   name: value => /^[\p{L}.'-]+(?:\s+[\p{L}.'-]+){1,5}$/u.test(value) && value.length <= 80,
   id: value => /^[a-z0-9][a-z0-9./-]{3,30}$/i.test(value),
+  username: value => /^[a-z0-9][a-z0-9._-]{2,60}$/i.test(value),
+  password: value => value.length >= 4 && /[^\s]/.test(value),
+  url: value => /^(https?:\/\/|\/\/)[^\s]+$/i.test(value),
 }
 
 function valueScores(rows: DataRow[], column: string) {
@@ -57,6 +60,9 @@ export function maskValue(value: unknown, type: MaskType, seed: string, column =
   if (type === 'phone') return `08${String(h).padStart(10, '0').slice(0, 10)}`
   if (type === 'address') return `Jl. Data Aman No. ${(h % 199) + 1}, Kota Contoh`
   if (type === 'id') return maskIdentifier(raw, isPapmiNumber(column) ? 1 : 3)
+  if (type === 'username') return maskIdentifier(raw, 2)
+  if (type === 'password') return '*'.repeat(Math.max(6, raw.length))
+  if (type === 'url') return raw.startsWith('//') ? '//masked.example/' : 'https://masked.example/'
   if (type === 'dob') { const parsed = new Date(raw); const year = Number.isNaN(parsed.getTime()) ? 1970 + (h % 35) : parsed.getFullYear(); return `${year}-${String((h % 12) + 1).padStart(2, '0')}-${String(((h >>> 5) % 28) + 1).padStart(2, '0')}` }
   return raw
 }
