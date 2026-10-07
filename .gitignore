@@ -9,3 +9,4 @@ dist/
 Thumbs.db
 .vite/
 *.tsbuildinfo
+backend/target/
