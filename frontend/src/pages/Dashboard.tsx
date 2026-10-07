@@ -1,11 +1,16 @@
 import { Card, CardHeader, CardTitle, CardContent } from "../components/ui/card";
 import { Button } from "../components/ui/button";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 
-interface DashboardProps {
-  onLogout: () => void;
-}
+export default function Dashboard() {
+  const { logout } = useAuth();
+  const navigate = useNavigate();
 
-export default function Dashboard({ onLogout }: DashboardProps) {
+  const handleLogout = () => {
+    logout();
+    navigate("/login", { replace: true });
+  };
   return (
     <div className="flex min-h-screen w-full flex-col">
       <header className="sticky top-0 flex h-16 items-center gap-4 border-b bg-background px-4 md:px-6">
@@ -19,7 +24,7 @@ export default function Dashboard({ onLogout }: DashboardProps) {
           </a>
         </nav>
         <div className="ml-auto flex items-center gap-4 md:gap-2 lg:gap-4">
-          <Button variant="outline" onClick={onLogout}>Logout</Button>
+          <Button variant="outline" onClick={handleLogout}>Logout</Button>
         </div>
       </header>
       

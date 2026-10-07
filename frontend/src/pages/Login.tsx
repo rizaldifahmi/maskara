@@ -3,19 +3,32 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter }
 import { Label } from "../components/ui/label";
 import { Input } from "../components/ui/input";
 import { Button } from "../components/ui/button";
+import { useAuth } from "../context/AuthContext";
+import { httpClient } from "../lib/http";
 
 interface LoginProps {
-  onLogin: () => void;
+  onLogin?: () => void;
 }
 
 export default function Login({ onLogin }: LoginProps) {
+  const { login } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (email && password) {
-      onLogin();
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await httpClient.post<{ token: string }>("/api/auth/login", { email, password });
+      login(res.token);
+      onLogin?.();
+    } catch (err: any) {
+      setError(err?.message || "Login failed. Please check your credentials.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -30,6 +43,11 @@ export default function Login({ onLogin }: LoginProps) {
         </CardHeader>
         <form onSubmit={handleSubmit}>
           <CardContent className="space-y-4">
+            {error && (
+              <div className="rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-600">
+                {error}
+              </div>
+            )}
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
               <Input 
@@ -55,7 +73,9 @@ export default function Login({ onLogin }: LoginProps) {
             </div>
           </CardContent>
           <CardFooter>
-            <Button type="submit" className="w-full">Login</Button>
+            <Button type="submit" className="w-full" disabled={loading}>
+              {loading ? "Logging in..." : "Login"}
+            </Button>
           </CardFooter>
         </form>
       </Card>
