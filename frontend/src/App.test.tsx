@@ -1,11 +1,13 @@
+import { describe, it, expect } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import App from './App';
 
 describe('App', () => {
-  it('renders the Vite and React logos', () => {
+  it('renders the Login page by default', () => {
     render(<App />);
-    expect(screen.getByAltText('Vite logo')).toBeInTheDocument();
-    expect(screen.getByAltText('React logo')).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: /login/i })).toBeInTheDocument();
+    expect(screen.getByLabelText(/email/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/password/i)).toBeInTheDocument();
   });
 
   it('verifies that no registration link is present in the UI to enforce strict single secure user policy', () => {
